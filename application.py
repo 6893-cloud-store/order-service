@@ -8,20 +8,20 @@ api = "https://keimui43t1.execute-api.us-east-1.amazonaws.com"
 
 pymysql.install_as_MySQLdb()
 
-app = Flask(__name__)
+application = Flask(__name__)
 # ------------------database----------------------------
-app.config['SQLALCHEMY_DATABASE_URI'] = \
+application.config['SQLALCHEMY_DATABASE_URI'] = \
     'mysql://root:dbuserdbuser@e6156.ck7gj29hlh1f.us-east-1.rds.amazonaws.com:3306/store_collect'
-app.config['SQLALCHEMY_BINDS'] = {
+application.config['SQLALCHEMY_BINDS'] = {
     'product': 'mysql://root:dbuserdbuser@e6156.ck7gj29hlh1f.us-east-1.rds.amazonaws.com:3306/store_product',
     'order': 'mysql://root:dbuserdbuser@e6156.ck7gj29hlh1f.us-east-1.rds.amazonaws.com:3306/store_order',
     'cart': 'mysql://root:dbuserdbuser@e6156.ck7gj29hlh1f.us-east-1.rds.amazonaws.com:3306/store_cart'
 }
 # 指定数据库文件
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
+application.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
 
 # 允许修改跟踪数据库
-db = SQLAlchemy(app)
+db = SQLAlchemy(application)
 
 
 class Collects(db.Model):
@@ -124,7 +124,7 @@ def list_order(user_id):
     return orders
 
 
-@app.route('/order/list', methods=['POST'])
+@application.route('/order/list', methods=['POST'])
 def order_list():
     user_id = request.get_json().get('user_id')
     orders = list_order(user_id)
@@ -146,7 +146,7 @@ def order_list():
     return {'code': '001', 'data': data}
 
 
-@app.route('/order/save', methods=['POST'])
+@application.route('/order/save', methods=['POST'])
 def order_save():
     user_id = request.get_json().get('user_id')
     products = request.get_json().get('products')
@@ -160,7 +160,7 @@ def order_save():
     return {'code': '001', 'msg': 'purchase success!'}
 
 
-@app.route('/order/remove', methods=['POST'])
+@application.route('/order/remove', methods=['POST'])
 def order_remove():
     order_id = request.get_json().get("order_id")
     if order_id is None or order_id == '' or not Orders.query.get(order_id):
@@ -218,7 +218,7 @@ def query_cart_by_user_id(user_id):
     return carts
 
 
-@app.route('/cart/list', methods=['POST'])
+@application.route('/cart/list', methods=['POST'])
 def cart_list():
     # 查询用户对应的购物车数据
     # 查询购物车对应的商品数据
@@ -254,7 +254,7 @@ def delete_cart(user_id, product_id):
     db.session.commit()
 
 
-@app.route('/cart/update', methods=['POST'])
+@application.route('/cart/update', methods=['POST'])
 def cart_update():
     product_id = request.get_json().get('product_id')
     user_id = request.get_json().get('user_id')
@@ -265,7 +265,7 @@ def cart_update():
     return {'code': '001', 'msg': 'modify number success!'}
 
 
-@app.route('/cart/remove', methods=['POST'])
+@application.route('/cart/remove', methods=['POST'])
 def cart_remove():
     product_id = request.get_json().get('product_id')
     user_id = request.get_json().get('user_id')
@@ -273,7 +273,7 @@ def cart_remove():
     return {'code': '001', 'msg': 'remove cart success!'}
 
 
-@app.route('/cart/save', methods=['POST'])
+@application.route('/cart/save', methods=['POST'])
 def cart_save():
     # 进行购物车数据保存
     # 初次保存，返回的数量为1
@@ -326,7 +326,7 @@ def select_collect_by_user(user_id):
     return collects
 
 
-@app.route('/collect/save', methods=['POST'])
+@application.route('/collect/save', methods=['POST'])
 def collect_save():
     product_id = request.get_json().get('product_id')
     user_id = request.get_json().get('user_id')
@@ -342,7 +342,7 @@ def collect_save():
     return res
 
 
-@app.route('/collect/list', methods=['POST'])
+@application.route('/collect/list', methods=['POST'])
 def collect_list():
     user_id = request.get_json().get('user_id')
     collects = select_collect_by_user(user_id)
@@ -376,7 +376,7 @@ def remove_collect_by_pair(user_id, product_id):
     db.session.commit()
 
 
-@app.route('/collect/remove', methods=['POST'])
+@application.route('/collect/remove', methods=['POST'])
 def collect_remove():
     user_id = request.get_json().get('user_id')
     product_id = request.get_json().get('product_id')
@@ -389,4 +389,4 @@ def collect_remove():
 
 
 if __name__ == '__main__':
-    app.run(port=8000, host='0.0.0.0')
+    application.run(port=8000, host='0.0.0.0')
