@@ -125,25 +125,30 @@ def create_order(user_id, products):
 def order_list():
     user_id = request.get_json().get('user_id')
     orders = Orders.query.filter_by(user_id=user_id).all()
-    print(orders)
-    data = []
+    set = set()
     for order in orders:
-        print(order)
-        product_id = order.product_id
-        product_name = get_product_name(product_id)
-        product_picture = get_product_picture(order)
-        dict = {}
-        dict['id'] = order.id
-        dict['order_id'] = order.order_id
-        dict['user_id'] = order.user_id
-        dict['product_id'] = order.product_id
-        dict['product_num'] = order.product_num
-        dict['product_price'] = order.product_price
-        dict['order_time'] = order.order_time
-        dict['product_name'] = product_name
-        dict['product_picture'] = product_picture
-        data.append(dict)
-    dic = {'code': '001', 'data': data}
+        set.add(order.order_id)
+    datas = []
+    for order_id in set:
+        sub_orders = Orders.query.filter_by(order_id=order_id).all()
+        data = []
+        for order in sub_orders:
+            product_id = order.product_id
+            product_name = get_product_name(product_id)
+            product_picture = get_product_picture(order)
+            dict = {}
+            dict['id'] = order.id
+            dict['order_id'] = order.order_id
+            dict['user_id'] = order.user_id
+            dict['product_id'] = order.product_id
+            dict['product_num'] = order.product_num
+            dict['product_price'] = order.product_price
+            dict['order_time'] = order.order_time
+            dict['product_name'] = product_name
+            dict['product_picture'] = product_picture
+            data.append(dict)
+        datas.append(data)
+    dic = {'code': '001', 'data': datas}
     return jsonify(dic)
 
 
