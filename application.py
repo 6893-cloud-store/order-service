@@ -125,11 +125,11 @@ def create_order(user_id, products):
 def order_list():
     user_id = request.get_json().get('user_id')
     orders = Orders.query.filter_by(user_id=user_id).all()
-    set = set()
+    s = set()
     for order in orders:
-        set.add(order.order_id)
+        s.add(order.order_id)
     datas = []
-    for order_id in set:
+    for order_id in s:
         sub_orders = Orders.query.filter_by(order_id=order_id).all()
         data = []
         for order in sub_orders:
