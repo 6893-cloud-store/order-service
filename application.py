@@ -1,6 +1,6 @@
 import time
 import pymysql
-from flask import Flask
+from flask import Flask, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask import request
 
@@ -143,7 +143,8 @@ def order_list():
         dict['product_name'] = product_name
         dict['product_picture'] = product_picture
         data.append(dict)
-    return {'code': '001', 'data': data}
+    dic = {'code': '001', 'data': data}
+    return jsonify(dic)
 
 
 @application.route('/order/save', methods=['POST'])
@@ -157,7 +158,8 @@ def order_save():
         delete_cart(user_id, product['productID'])
         # 修改库存和销售
         update_product_num_and_sales(product['productID'], product['num'])
-    return {'code': '001', 'msg': 'purchase success!'}
+    dic = {'code': '001', 'msg': 'purchase success!'}
+    return jsonify(dic)
 
 
 @application.route('/order/remove', methods=['POST'])
@@ -169,7 +171,8 @@ def order_remove():
         delete_id = Orders.query.get(order_id)
         db.session.delete(delete_id)
         db.session.commit()
-    return {'code': '001', 'msg': 'deleted'}
+    dic = {'code': '001', 'msg': 'deleted'}
+    return jsonify(dic)
 
 
 def check_cart(user_id, product_id):
@@ -243,7 +246,7 @@ def cart_list():
         dic['check'] = False
         cart_list.append(dic)
     res = {'code': '001', 'data': cart_list}
-    return res
+    return jsonify(res)
 
 
 def delete_cart(user_id, product_id):
@@ -261,8 +264,10 @@ def cart_update():
     num = request.get_json().get('num')
     status = update_cart_num(user_id, product_id, num)
     if not status:
-        return {'code': '004', 'msg': 'number is larger than stock'}
-    return {'code': '001', 'msg': 'modify number success!'}
+        dic = {'code': '004', 'msg': 'number is larger than stock'}
+        return jsonify(dic)
+    dic = {'code': '001', 'msg': 'modify number success!'}
+    return jsonify(dic)
 
 
 @application.route('/cart/remove', methods=['POST'])
@@ -270,7 +275,8 @@ def cart_remove():
     product_id = request.get_json().get('product_id')
     user_id = request.get_json().get('user_id')
     delete_cart(user_id, product_id)
-    return {'code': '001', 'msg': 'remove cart success!'}
+    dic = {'code': '001', 'msg': 'remove cart success!'}
+    return jsonify({'code': '001', 'msg': 'remove cart success!'})
 
 
 @application.route('/cart/save', methods=['POST'])
@@ -296,13 +302,15 @@ def cart_save():
         dic['maxNum'] = s.product_num
         dic['check'] = False
         res = {'code': '001', 'data': dic, 'msg': 'add to cart success!'}
-        return res
+        return jsonify(res)
     else:
         status = update_cart_num_1(user_id, product_id)
         if status:
-            return {'code': '002', 'msg': 'This product was in your cart, number + 1!'}
+            dic = {'code': '002', 'msg': 'This product was in your cart, number + 1!'}
+            return jsonify(dic)
         else:
-            return {'code': '003', 'msg': 'Can not add, stock is not enough!'}
+            dic = {'code': '003', 'msg': 'Can not add, stock is not enough!'}
+            return jsonify(dic)
 
 
 def check_collect(product_id, user_id):
@@ -339,7 +347,7 @@ def collect_save():
     # 不存在，添加，并且提示添加成功即可
     save_collect(product_id, user_id)
     res = {'code': '001', 'msg': 'Collect Success!'}
-    return res
+    return jsonify(res)
 
 
 @application.route('/collect/list', methods=['POST'])
@@ -367,7 +375,7 @@ def collect_list():
         'code': '001',
         'data': collect_list
     }
-    return res
+    return jsonify(res)
 
 
 def remove_collect_by_pair(user_id, product_id):
@@ -385,7 +393,7 @@ def collect_remove():
         'code': '001',
         'msg': 'remove success!'
     }
-    return res
+    return jsonify(res)
 
 
 if __name__ == '__main__':
