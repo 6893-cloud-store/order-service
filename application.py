@@ -49,7 +49,7 @@ class Orders(db.Model):
     user_id = db.Column(db.Integer)
     product_id = db.Column(db.Integer)
     product_num = db.Column(db.Integer)
-    product_price = db.Column(db.Float)
+    product_price = db.Column(db.Numeric)
     order_time = db.Column(db.Integer)
 
 
@@ -70,6 +70,7 @@ class Products(db.Model):
 
 
 class Pictures(db.Model):
+    __bind_key__ = 'product'
     __tablename__ = 'product_picture'
     id = db.Column(db.Integer, primary_key=True)
     product_id = db.Column(db.Integer)
@@ -78,17 +79,18 @@ class Pictures(db.Model):
 
 
 class Categories(db.Model):
+    __bind_key__ = 'product'
     __tablename__ = 'category'
     category_id = db.Column(db.Integer, primary_key=True)
     category_name = db.Column(db.String(20))
 
 
-def get_product_name(order):
-    return Products.query.get(order['product_id']).product_name
+def get_product_name(product_id):
+    return Products.query.get(product_id).product_name
 
 
 def get_product_picture(order):
-    return Products.query.get(order['product_id']).product_picture
+    return Products.query.get(order.product_id).product_picture
 
 
 def update_product_num_and_sales(product_id, num):
@@ -119,18 +121,16 @@ def create_order(user_id, products):
     db.session.commit()
 
 
-def list_order(user_id):
-    orders = Orders.query.filter_by(user_id=user_id).all()
-    return orders
-
-
 @application.route('/order/list', methods=['POST'])
 def order_list():
     user_id = request.get_json().get('user_id')
-    orders = list_order(user_id)
+    orders = Orders.query.filter_by(user_id=user_id).all()
+    print(orders)
     data = []
     for order in orders:
-        product_name = get_product_name(order)
+        print(order)
+        product_id = order.product_id
+        product_name = get_product_name(product_id)
         product_picture = get_product_picture(order)
         dict = {}
         dict['id'] = order.id
